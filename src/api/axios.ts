@@ -1,41 +1,63 @@
 import axios from "axios";
+import type { AxiosRequestConfig, AxiosResponse } from "axios";
 import { toast } from "sonner";
 
 import { getApiConfig } from "./config";
 
-const { apiUrl } = getApiConfig();
+// Lazy initialization of axios instance
+const createApi = () => {
+  const { apiUrl, rapidApiKey, rapidApiHost } = getApiConfig();
 
-const api = axios.create({
-  baseURL: apiUrl,
-});
+  const api = axios.create({
+    baseURL: apiUrl,
+    headers: {
+      "X-RapidAPI-Key": rapidApiKey,
+      "X-RapidAPI-Host": rapidApiHost,
+    },
+  });
 
-api.interceptors.response.use(
-  (res) => res,
-  async (err) => {
-    if (err.response?.status === 400) {
-      handle400Error(err.response.data);
-      return Promise.resolve(undefined);
+  api.interceptors.response.use(
+    (res) => res,
+    async (err) => {
+      if (err.response) {
+        const message = err.response.data?.message || "Bir hata oluştu";
+        toast.error(message);
+      }
+      return Promise.reject(err);
     }
-    return Promise.reject(err);
-  }
-);
+  );
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function handle400Error(data: any) {
-  if (Array.isArray(data)) {
-    data.forEach((res: { code: string; name: string }) => {
-      toast.error(`${res.code}: ${res.name}`);
-    });
-  } else if (data?.errors && Array.isArray(data.errors)) {
-    data.errors.forEach((res: { code: string; name: string }) => {
-      toast.error(`${res.code}: ${res.name}`);
-    });
-  } else if (data?.code && data?.name) {
-    toast.error(`${data.code}: ${data.name}`);
-  } else {
-    toast.error("Geçersiz istek. Lütfen bilgilerinizi kontrol edin.");
-    console.error("Unhandled 400 error structure:", data);
+  return api;
+};
+
+let apiInstance: ReturnType<typeof createApi>;
+
+const getApi = () => {
+  if (!apiInstance) {
+    apiInstance = createApi();
   }
-}
+  return apiInstance;
+};
+
+export const api = {
+  get: async <T>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>> => getApi().get<T>(url, config),
+  post: async <T>(
+    url: string,
+    data?: unknown,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>> => getApi().post<T>(url, data, config),
+  put: async <T>(
+    url: string,
+    data?: unknown,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>> => getApi().put<T>(url, data, config),
+  delete: async <T>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>> => getApi().delete<T>(url, config),
+};
 
 export default api;

@@ -1,113 +1,75 @@
-import { useQueryWithData } from "@/hooks/use-query";
 import type {
   Exercise,
   BodyPartList,
   EquipmentList,
   TargetList,
 } from "@/types/exercise";
+import { useQueryWithData } from "@/hooks/use-query";
 
-// Query Keys
 export const exerciseKeys = {
   all: ["exercises"],
   lists: () => [...exerciseKeys.all, "lists"],
-  list: (filters: Record<string, unknown>) => [
+  list: (filters: Record<string, string>) => [
     ...exerciseKeys.all,
-    JSON.stringify(filters),
+    { ...filters },
   ],
-  bodyParts: () => [...exerciseKeys.all, "lists", "bodyParts"],
-  equipment: () => [...exerciseKeys.all, "lists", "equipment"],
-  targets: () => [...exerciseKeys.all, "lists", "targets"],
   detail: (id: string) => [...exerciseKeys.all, "detail", id],
+  bodyParts: () => [...exerciseKeys.all, "bodyParts"],
+  byBodyPart: (bodyPart: string) => [
+    ...exerciseKeys.all,
+    "byBodyPart",
+    bodyPart,
+  ],
+  equipment: () => [...exerciseKeys.all, "equipment"],
+  targets: () => [...exerciseKeys.all, "targets"],
 };
 
 // Tüm egzersizleri getir
-export function useExercises() {
-  return useQueryWithData<Exercise[]>(exerciseKeys.all, "/exercises", true);
-}
-
-// Vücut bölgesine göre egzersizleri getir
-export function useExercisesByBodyPart(bodyPart: string) {
+export const useExercises = () => {
   return useQueryWithData<Exercise[]>(
-    exerciseKeys.list({ bodyPart }),
+    exerciseKeys.all as string[],
+    "/exercises"
+  );
+};
+
+// Vücut bölümüne göre egzersizleri getir
+export const useExercisesByBodyPart = (bodyPart: string) => {
+  return useQueryWithData<Exercise[]>(
+    exerciseKeys.byBodyPart(bodyPart) as string[],
     `/exercises/bodyPart/${bodyPart}`,
-    !!bodyPart
+    !!bodyPart // bodyPart varsa sorguyu etkinleştir
   );
-}
-
-// Ekipman tipine göre egzersizleri getir
-export function useExercisesByEquipment(equipment: string) {
-  return useQueryWithData<Exercise[]>(
-    exerciseKeys.list({ equipment }),
-    `/exercises/equipment/${equipment}`,
-    !!equipment
-  );
-}
-
-// Hedef kasa göre egzersizleri getir
-export function useExercisesByTarget(target: string) {
-  return useQueryWithData<Exercise[]>(
-    exerciseKeys.list({ target }),
-    `/exercises/target/${target}`,
-    !!target
-  );
-}
+};
 
 // Egzersiz detayını getir
-export function useExerciseDetail(id: string) {
+export const useExerciseDetail = (id: string) => {
   return useQueryWithData<Exercise>(
-    exerciseKeys.detail(id),
+    exerciseKeys.detail(id) as string[],
     `/exercises/exercise/${id}`,
-    !!id
+    !!id // id varsa sorguyu etkinleştir
   );
-}
+};
 
-// İsme göre egzersiz ara
-export function useExerciseByName(name: string) {
-  return useQueryWithData<Exercise>(
-    exerciseKeys.list({ name }),
-    `/exercises/name/${name}`,
-    !!name
-  );
-}
-
-// Vücut bölümlerinin listesini getir
-export function useBodyPartsList() {
+// Vücut bölümleri listesini getir (renamed from useBodyParts to match component usage)
+export const useBodyPartsList = () => {
   return useQueryWithData<BodyPartList>(
-    exerciseKeys.bodyParts(),
-    "/exercises/bodyPartList",
-    true,
-    undefined,
-    {
-      staleTime: Infinity,
-      gcTime: Infinity,
-    }
+    exerciseKeys.bodyParts() as string[],
+    "/exercises/bodyPartList"
   );
-}
+};
 
 // Ekipman listesini getir
-export function useEquipmentList() {
+export const useEquipment = () => {
   return useQueryWithData<EquipmentList>(
-    exerciseKeys.equipment(),
-    "/exercises/equipmentList",
-    true,
-    undefined,
-    {
-      staleTime: Infinity,
-      gcTime: Infinity,
-    }
+    exerciseKeys.equipment() as string[],
+    "/exercises/equipmentList"
   );
-}
+};
 
-// Hedef kas grupları listesini getir
-export function useTargetList() {
+// Hedef bölgeleri getir
+export const useTargets = () => {
   return useQueryWithData<TargetList>(
-    exerciseKeys.targets(),
-    "/exercises/targetList",
-    true,
-    undefined,
-    {
-      staleTime: Infinity,
-      gcTime: Infinity,
-    }
+    exerciseKeys.targets() as string[],
+    "/exercises/targetList"
   );
-}
+};
