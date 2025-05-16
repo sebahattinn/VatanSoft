@@ -2,7 +2,7 @@ import { ExerciseList } from "./components/ExerciseList";
 
 function App() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <ExerciseList />
     </div>
   );

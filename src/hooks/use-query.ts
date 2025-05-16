@@ -15,7 +15,7 @@ export interface ApiParams {
 
 // Genel sorgu hook'u
 export function useQueryWithData<T>(
-  key: string[],
+  key: readonly unknown[],
   url: string,
   enabled = true,
   params?: ApiParams,
