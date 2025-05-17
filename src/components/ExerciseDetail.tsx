@@ -1,6 +1,9 @@
 import { useExerciseDetail } from "@/services/exerciseService";
-import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Card, CardContent } from "./ui/card";
+import { Badge } from "./ui/badge";
 import { Skeleton } from "./ui/skeleton";
+import { ScrollArea } from "./ui/scroll-area";
 
 interface ExerciseDetailProps {
   exerciseId: string;
@@ -14,54 +17,93 @@ export default function ExerciseDetail({
   const { data: exercise, isLoading } = useExerciseDetail(exerciseId);
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-background rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
-        <Button
-          variant="default"
-          onClick={onClose}
-          className="absolute top-4 right-4 text-xl"
-        >
-          ✕
-        </Button>
+    <Dialog open={true} onOpenChange={() => onClose()}>
+      <DialogContent className="max-w-3xl h-[90vh] p-6">
+        <DialogHeader className="px-0">
+          <DialogTitle className="text-2xl">
+            {isLoading ? <Skeleton className="h-8 w-64" /> : exercise?.name}
+          </DialogTitle>
+        </DialogHeader>
 
-        {isLoading ? (
-          <>
-            <Skeleton className="h-8 w-64 mb-4" />
-            <Skeleton className="h-48 w-full mb-4" />
-            <Skeleton className="h-24 w-full" />
-          </>
-        ) : (
-          <>
-            <h2 className="text-2xl font-bold mb-4">{exercise?.name}</h2>
-            <img
-              src={exercise?.gifUrl}
-              alt={exercise?.name}
-              className="w-full max-h-96 object-contain rounded-lg mb-6"
-            />
-            <h3 className="font-semibold mb-2">Talimatlar:</h3>
-            <ol className="list-decimal list-inside space-y-2 mb-6">
-              {exercise?.instructions.map((ins, idx) => (
-                <li key={idx}>{ins}</li>
-              ))}
-            </ol>
-
-            <div className="grid grid-cols-3 gap-4 text-sm">
-              <div>
-                <p className="font-medium">Bölge</p>
-                <p className="text-muted-foreground">{exercise?.bodyPart}</p>
-              </div>
-              <div>
-                <p className="font-medium">Hedef</p>
-                <p className="text-muted-foreground">{exercise?.target}</p>
-              </div>
-              <div>
-                <p className="font-medium">Ekipman</p>
-                <p className="text-muted-foreground">{exercise?.equipment}</p>
+        <ScrollArea className="h-[calc(90vh-8rem)] mt-4 pr-4">
+          {isLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-48 w-full" />
+              <Skeleton className="h-24 w-full" />
+              <div className="grid grid-cols-3 gap-4">
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
               </div>
             </div>
-          </>
-        )}
-      </div>
-    </div>
+          ) : (
+            <div className="space-y-6">
+              <Card>
+                <CardContent className="p-0">
+                  <img
+                    src={exercise?.gifUrl}
+                    alt={exercise?.name}
+                    className="w-full max-h-96 object-contain rounded-lg"
+                  />
+                </CardContent>
+              </Card>
+              <div className="grid grid-cols-3 gap-4">
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <Badge variant="secondary" className="mb-2">
+                        Bölge
+                      </Badge>
+                      <p className="text-lg font-medium">
+                        {exercise?.bodyPart}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <Badge variant="secondary" className="mb-2">
+                        Hedef
+                      </Badge>
+                      <p className="text-lg font-medium">{exercise?.target}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <Badge variant="secondary" className="mb-2">
+                        Ekipman
+                      </Badge>
+                      <p className="text-lg font-medium">
+                        {exercise?.equipment}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>{" "}
+              <div className="pb-4">
+                <h3 className="text-lg font-semibold mb-3">Talimatlar</h3>
+                <Card>
+                  <CardContent className="pt-6">
+                    <ol className="list-decimal space-y-3">
+                      {exercise?.instructions.map((ins, idx) => (
+                        <li
+                          key={idx}
+                          className="text-muted-foreground ml-5 pl-2"
+                        >
+                          {ins}
+                        </li>
+                      ))}
+                    </ol>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
   );
 }

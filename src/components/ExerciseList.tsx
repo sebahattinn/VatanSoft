@@ -10,6 +10,7 @@ import { Skeleton } from "./ui/skeleton";
 import { Button } from "./ui/button";
 import { ExerciseFilters } from "./ExerciseFilters";
 import { ExerciseSearchForm } from "./ExerciseSearchForm";
+import { Card } from "./ui/card";
 import type { Exercise } from "@/types/exercise";
 
 const ITEMS_PER_PAGE = 9;
@@ -122,51 +123,82 @@ export function ExerciseList() {
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Egzersiz Listesi</h1>
-
-      {/* Arama Formu */}
-      <ExerciseSearchForm onSearch={setSearchTerm} />
-
-      {/* Filtre Bileşeni */}
-      <ExerciseFilters
-        selected={filters}
-        onSelect={{
-          setBodyPart: (bodyPart) => setFilters((f) => ({ ...f, bodyPart })),
-          setTarget: (target) => setFilters((f) => ({ ...f, target })),
-          setEquipment: (equipment) => setFilters((f) => ({ ...f, equipment })),
-        }}
-        onClear={handleClearFilters}
-      />
-
-      {/* Egzersiz Grid'i */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-        {filteredExercises.map((exercise) => (
-          <ExerciseCard
-            key={exercise.id}
-            exercise={exercise}
-            onClick={() => setSelectedExerciseId(exercise.id)}
+    <div className="container mx-auto py-8 px-4 space-y-8">
+      <div className="flex flex-col items-center text-center space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight">Egzersiz Listesi</h1>
+        <p className="text-muted-foreground">
+          Yüzlerce egzersiz arasından size uygun olanı bulun
+        </p>
+      </div>
+      <Card className="p-6">
+        <div className="space-y-6">
+          <ExerciseSearchForm onSearch={setSearchTerm} />
+          <ExerciseFilters
+            selected={filters}
+            onSelect={{
+              setBodyPart: (bodyPart) =>
+                setFilters((f) => ({ ...f, bodyPart })),
+              setTarget: (target) => setFilters((f) => ({ ...f, target })),
+              setEquipment: (equipment) =>
+                setFilters((f) => ({ ...f, equipment })),
+            }}
+            onClear={handleClearFilters}
           />
+        </div>
+      </Card>{" "}
+      <div
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        key={searchTerm + filters.bodyPart + filters.target + filters.equipment}
+      >
+        {filteredExercises.map((exercise) => (
+          <div key={exercise.id}>
+            <ExerciseCard
+              exercise={exercise}
+              onClick={() => setSelectedExerciseId(exercise.id)}
+            />
+          </div>
         ))}
         {isLoading && (
           <>
             {[...Array(3)].map((_, i) => (
-              <Skeleton key={`loading-${i}`} className="h-48 w-full" />
+              <Card key={`loading-${i}`} className="p-4 space-y-4">
+                <Skeleton className="h-48 w-full rounded-lg" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              </Card>
             ))}
           </>
         )}
       </div>
-
-      {/* Load More Button */}
+      {filteredExercises.length === 0 && !isLoading && (
+        <Card className="p-8 text-center">
+          <p className="text-muted-foreground">Sonuç bulunamadı.</p>
+          <Button onClick={handleClearFilters} variant="link" className="mt-2">
+            Filtreleri temizle
+          </Button>
+        </Card>
+      )}
       {hasMore && !isLoading && (
-        <div className="flex justify-center mt-8">
-          <Button onClick={handleLoadMore} variant="outline" size="lg">
-            Daha Fazla Yükle
+        <div className="flex justify-center">
+          <Button
+            onClick={handleLoadMore}
+            variant="outline"
+            size="lg"
+            className="min-w-[200px]"
+          >
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Yükleniyor...
+              </div>
+            ) : (
+              "Daha Fazla Yükle"
+            )}
           </Button>
         </div>
       )}
-
-      {/* Seçilen Egzersiz Detay Modalı */}
       {selectedExerciseId && (
         <ExerciseDetail
           exerciseId={selectedExerciseId}
