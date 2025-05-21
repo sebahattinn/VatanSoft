@@ -20,8 +20,8 @@ Modern, hızlı ve filtreleme destekli bir egzersiz arama uygulaması. Vücut b�
 ## 📦 Kurulum
 
 ```bash
-git clone https://github.com/kullaniciadi/proje-adi.git
-cd proje-adi
+git clone https://github.com/sebahattinn/VatanSoft.git
+cd VatanSoft
 npm install
 npm run dev
 ```
