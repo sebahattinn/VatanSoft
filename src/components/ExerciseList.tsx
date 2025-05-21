@@ -1,9 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  useExercises,
-  useExercisesByBodyPart,
-  useExercisesByName,
-} from "@/services/exerciseService";
+import { useExerciseList } from "@/hooks/useExerciseList";
 import { ExerciseCard } from "./ExerciseCard";
 import ExerciseDetail from "./ExerciseDetail";
 import { Skeleton } from "./ui/skeleton";
@@ -21,105 +17,63 @@ export function ExerciseList() {
   const [page, setPage] = useState(0);
   const [exercises, setExercises] = useState<Exercise[]>([]);
 
-  // Seçilen filtreler
-  const [filters, setFilters] = useState<{
-    bodyPart: string;
-    target: string;
-    equipment: string;
-  }>({
+  const [filters, setFilters] = useState({
     bodyPart: "",
     target: "",
     equipment: "",
   });
 
-  // Pagination parametreleri
   const paginationParams = {
     offset: page * ITEMS_PER_PAGE,
     limit: ITEMS_PER_PAGE,
   };
 
-  // API sorguları
-  const { data: newExercises, isLoading: allLoading } =
-    useExercises(paginationParams);
-  const { data: searchResults, isLoading: searchLoading } = useExercisesByName(
-    searchTerm,
-    searchTerm ? paginationParams : undefined
+  const { exercises: currentData, isLoading } = useExerciseList(
+    filters,
+    paginationParams,
+    searchTerm
   );
-  const { data: filteredByBody, isLoading: loadingBody } =
-    useExercisesByBodyPart(
-      filters.bodyPart,
-      filters.bodyPart ? paginationParams : undefined
-    );
 
-  // Yükleme durumu
-  const isLoading = allLoading || searchLoading || loadingBody;
-
-  // Filtre veya arama değiştiğinde mevcut egzersizleri sıfırla
   useEffect(() => {
-    setExercises([]);
     setPage(0);
-  }, [searchTerm, filters.bodyPart, filters.target, filters.equipment]);
+  }, [filters.bodyPart, filters.target, filters.equipment, searchTerm]);
 
-  // Yeni veri geldiğinde egzersizleri güncelle
+  // Sayfa = 0 → doğrudan güncelle
   useEffect(() => {
-    const currentData = searchTerm
-      ? searchResults
-      : filters.bodyPart
-      ? filteredByBody
-      : newExercises;
+    if (!currentData) return;
 
-    if (currentData) {
-      if (page === 0) {
+    if (page === 0) {
+      const currentIds = JSON.stringify(currentData.map((e) => e.id));
+      const prevIds = JSON.stringify(exercises.map((e) => e.id));
+      if (currentIds !== prevIds) {
         setExercises(currentData);
-      } else {
-        setExercises((prev) => {
-          const newExercisesIds = new Set(currentData.map((ex) => ex.id));
-          const existingExercises = prev.filter(
-            (ex) => !newExercisesIds.has(ex.id)
-          );
-          return [...existingExercises, ...currentData];
-        });
       }
     }
-  }, [
-    newExercises,
-    searchResults,
-    filteredByBody,
-    page,
-    searchTerm,
-    filters.bodyPart,
-  ]);
+  }, [currentData, exercises, page]);
 
-  // Filtreleme mantığı
-  const getFilteredExercises = (): Exercise[] => {
-    let result = exercises;
+  // Sayfa > 0 → yeni veri varsa birleştir
+  useEffect(() => {
+    if (!currentData || page === 0) return;
 
-    if (filters.target) {
-      result = result.filter((e) => e.target === filters.target);
-    }
-    if (filters.equipment) {
-      result = result.filter((e) => e.equipment === filters.equipment);
-    }
+    setExercises((prev) => {
+      const existingIds = new Set(prev.map((e) => e.id));
+      const fresh = currentData.filter((e) => !existingIds.has(e.id));
+      if (fresh.length === 0) return prev; // döngüyü engelle
+      return [...prev, ...fresh];
+    });
+  }, [currentData, page]);
 
-    return result;
-  };
-
-  const filteredExercises = getFilteredExercises();
-  const hasMore =
-    (newExercises?.length ?? 0) === ITEMS_PER_PAGE ||
-    (searchResults?.length ?? 0) === ITEMS_PER_PAGE ||
-    (filteredByBody?.length ?? 0) === ITEMS_PER_PAGE;
+  const hasMore = (currentData?.length ?? 0) === ITEMS_PER_PAGE;
 
   const handleClearFilters = () => {
     setFilters({ bodyPart: "", target: "", equipment: "" });
     setSearchTerm("");
     setSelectedExerciseId("");
-    setExercises([]);
     setPage(0);
   };
 
   const handleLoadMore = () => {
-    setPage((p) => p + 1);
+    setPage((prev) => prev + 1);
   };
 
   return (
@@ -130,6 +84,7 @@ export function ExerciseList() {
           Yüzlerce egzersiz arasından size uygun olanı bulun
         </p>
       </div>
+
       <Card className="p-6">
         <div className="space-y-6">
           <ExerciseSearchForm onSearch={setSearchTerm} />
@@ -137,42 +92,41 @@ export function ExerciseList() {
             selected={filters}
             onSelect={{
               setBodyPart: (bodyPart) =>
-                setFilters((f) => ({ ...f, bodyPart })),
-              setTarget: (target) => setFilters((f) => ({ ...f, target })),
+                setFilters({ bodyPart, target: "", equipment: "" }),
+              setTarget: (target) =>
+                setFilters({ bodyPart: "", target, equipment: "" }),
               setEquipment: (equipment) =>
-                setFilters((f) => ({ ...f, equipment })),
+                setFilters({ bodyPart: "", target: "", equipment }),
             }}
             onClear={handleClearFilters}
           />
         </div>
-      </Card>{" "}
+      </Card>
+
       <div
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        key={searchTerm + filters.bodyPart + filters.target + filters.equipment}
+        key={JSON.stringify(filters) + searchTerm}
       >
-        {filteredExercises.map((exercise) => (
-          <div key={exercise.id}>
-            <ExerciseCard
-              exercise={exercise}
-              onClick={() => setSelectedExerciseId(exercise.id)}
-            />
-          </div>
+        {exercises.map((exercise) => (
+          <ExerciseCard
+            key={exercise.id}
+            exercise={exercise}
+            onClick={() => setSelectedExerciseId(exercise.id)}
+          />
         ))}
-        {isLoading && (
-          <>
-            {[...Array(3)].map((_, i) => (
-              <Card key={`loading-${i}`} className="p-4 space-y-4">
-                <Skeleton className="h-48 w-full rounded-lg" />
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-2/3" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              </Card>
-            ))}
-          </>
-        )}
+        {isLoading &&
+          [...Array(3)].map((_, i) => (
+            <Card key={`loading-${i}`} className="p-4 space-y-4">
+              <Skeleton className="h-48 w-full rounded-lg" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            </Card>
+          ))}
       </div>
-      {filteredExercises.length === 0 && !isLoading && (
+
+      {exercises.length === 0 && !isLoading && (
         <Card className="p-8 text-center">
           <p className="text-muted-foreground">Sonuç bulunamadı.</p>
           <Button onClick={handleClearFilters} variant="link" className="mt-2">
@@ -180,6 +134,7 @@ export function ExerciseList() {
           </Button>
         </Card>
       )}
+
       {hasMore && !isLoading && (
         <div className="flex justify-center">
           <Button
@@ -188,17 +143,11 @@ export function ExerciseList() {
             size="lg"
             className="min-w-[200px]"
           >
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                Yükleniyor...
-              </div>
-            ) : (
-              "Daha Fazla Yükle"
-            )}
+            Daha Fazla Yükle
           </Button>
         </div>
       )}
+
       {selectedExerciseId && (
         <ExerciseDetail
           exerciseId={selectedExerciseId}

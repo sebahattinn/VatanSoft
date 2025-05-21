@@ -38,6 +38,25 @@ export function ExerciseFilters({
   const hasActiveFilters =
     selected.bodyPart || selected.target || selected.equipment;
 
+  // Yeni seçim işleyicileri
+  const handleBodyPartSelect = (value: string) => {
+    onSelect.setTarget("");
+    onSelect.setEquipment("");
+    onSelect.setBodyPart(value);
+  };
+
+  const handleTargetSelect = (value: string) => {
+    onSelect.setBodyPart("");
+    onSelect.setEquipment("");
+    onSelect.setTarget(value);
+  };
+
+  const handleEquipmentSelect = (value: string) => {
+    onSelect.setBodyPart("");
+    onSelect.setTarget("");
+    onSelect.setEquipment(value);
+  };
+
   return (
     <div className="w-full space-y-4">
       {hasActiveFilters && (
@@ -49,7 +68,7 @@ export function ExerciseFilters({
             <Badge
               variant="secondary"
               className="cursor-pointer text-black"
-              onClick={() => onSelect.setBodyPart("")}
+              onClick={() => handleBodyPartSelect("")}
             >
               {selected.bodyPart} ×
             </Badge>
@@ -58,7 +77,7 @@ export function ExerciseFilters({
             <Badge
               variant="secondary"
               className="cursor-pointer text-black"
-              onClick={() => onSelect.setTarget("")}
+              onClick={() => handleTargetSelect("")}
             >
               🎯 {selected.target} ×
             </Badge>
@@ -67,7 +86,7 @@ export function ExerciseFilters({
             <Badge
               variant="secondary"
               className="cursor-pointer text-black"
-              onClick={() => onSelect.setEquipment("")}
+              onClick={() => handleEquipmentSelect("")}
             >
               🧰 {selected.equipment} ×
             </Badge>
@@ -95,13 +114,14 @@ export function ExerciseFilters({
             Ekipmanlar
           </TabsTrigger>
         </TabsList>
+
         <TabsContent value="bodyParts">
           <ScrollArea className="h-[200px] w-full rounded-md border p-4">
             <div className="flex flex-wrap gap-2">
               {bodyParts.map((part) => (
                 <Button
                   key={part}
-                  onClick={() => onSelect.setBodyPart(part)}
+                  onClick={() => handleBodyPartSelect(part)}
                   variant={selected.bodyPart === part ? "secondary" : "outline"}
                   size="sm"
                   className="text-white"
@@ -112,13 +132,14 @@ export function ExerciseFilters({
             </div>
           </ScrollArea>
         </TabsContent>
+
         <TabsContent value="targets">
           <ScrollArea className="h-[200px] w-full rounded-md border p-4">
             <div className="flex flex-wrap gap-2">
               {targets.map((target) => (
                 <Button
                   key={target}
-                  onClick={() => onSelect.setTarget(target)}
+                  onClick={() => handleTargetSelect(target)}
                   variant={selected.target === target ? "secondary" : "outline"}
                   size="sm"
                   className="text-white"
@@ -129,13 +150,14 @@ export function ExerciseFilters({
             </div>
           </ScrollArea>
         </TabsContent>
+
         <TabsContent value="equipment">
           <ScrollArea className="h-[200px] w-full rounded-md border p-4">
             <div className="flex flex-wrap gap-2">
               {equipment.map((eq) => (
                 <Button
                   key={eq}
-                  onClick={() => onSelect.setEquipment(eq)}
+                  onClick={() => handleEquipmentSelect(eq)}
                   variant={selected.equipment === eq ? "secondary" : "outline"}
                   size="sm"
                   className="text-white"

@@ -1,14 +1,14 @@
 import axios from "axios";
 import { toast } from "sonner";
-import { getApiConfig } from "./config";
+import { getApiConfig } from "@/api/config"; // BURAYA GÜNCELLE
 
 const config = getApiConfig();
 
 const exerciseApi = axios.create({
-  baseURL: "https://exercisedb.p.rapidapi.com",
+  baseURL: config.apiUrl,
   headers: {
-    "X-RapidAPI-Key": config.rapidApiKey || import.meta.env.VITE_RAPIDAPI_KEY,
-    "X-RapidAPI-Host": "exercisedb.p.rapidapi.com",
+    "X-RapidAPI-Key": config.rapidApiKey,
+    "X-RapidAPI-Host": config.rapidApiHost,
   },
 });
 

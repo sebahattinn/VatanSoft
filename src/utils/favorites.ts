@@ -1,5 +1,7 @@
+const STORAGE_KEY = "favorite-exercises";
+
 export const getFavorites = (): string[] => {
-  const data = localStorage.getItem("favorite-exercises");
+  const data = localStorage.getItem(STORAGE_KEY);
   return data ? JSON.parse(data) : [];
 };
 
@@ -9,7 +11,7 @@ export const toggleFavorite = (id: string): string[] => {
     ? current.filter((fav) => fav !== id)
     : [...current, id];
 
-  localStorage.setItem("favorite-exercises", JSON.stringify(updated));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   return updated;
 };
 

@@ -1,7 +1,9 @@
 import {
   useMutation,
   useQuery,
+  type UseMutationResult,
   type UseQueryOptions,
+  type UseQueryResult,
 } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import api from "@/api/axios";
@@ -20,7 +22,7 @@ export function useQueryWithData<T>(
   enabled = true,
   params?: ApiParams,
   options?: Partial<UseQueryOptions<T, Error, T>>
-) {
+): UseQueryResult<T, Error> {
   return useQuery<T, Error, T>({
     queryKey: key,
     queryFn: async () => {
@@ -40,7 +42,7 @@ export function useMutationWithData<T, U = unknown>(
     onSuccess?: (data: T) => void;
     onError?: (error: AxiosError) => void;
   }
-) {
+): UseMutationResult<T, AxiosError, U> {
   return useMutation<T, AxiosError, U>({
     mutationFn: async (variables: U) => {
       const { data } = await api[method]<T>(url, variables);
@@ -49,7 +51,6 @@ export function useMutationWithData<T, U = unknown>(
     ...options,
   });
 }
-
 // Sayfalama için özel hook
 export function usePaginatedQuery<T>(
   key: string[],
@@ -57,7 +58,7 @@ export function usePaginatedQuery<T>(
   page: number,
   pageSize: number,
   enabled = true
-) {
+): UseQueryResult<T, Error> {
   return useQuery<T, Error, T>({
     queryKey: [...key, page, pageSize],
     queryFn: async () => {
@@ -72,7 +73,6 @@ export function usePaginatedQuery<T>(
     enabled,
   });
 }
-
 // Sonsuz sayfalama için özel hook
 export function useInfiniteQuery<T>(
   key: string[],

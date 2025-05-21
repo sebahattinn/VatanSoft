@@ -10,7 +10,7 @@ import { exerciseKeys } from "@/utils/queryKeys";
 // Tüm egzersizleri getir
 export const useExercises = (params?: Pick<ApiParams, "limit" | "offset">) => {
   return useQueryWithData<Exercise[]>(
-    exerciseKeys.list(),
+    exerciseKeys.list(params),
     "/exercises",
     true,
     params
@@ -32,7 +32,7 @@ export const useExercisesByBodyPart = (
   params?: Pick<ApiParams, "limit" | "offset">
 ) => {
   return useQueryWithData<Exercise[]>(
-    exerciseKeys.byBodyPart(bodyPart),
+    exerciseKeys.byBodyPart(bodyPart, params),
     `/exercises/bodyPart/${bodyPart}`,
     Boolean(bodyPart),
     params
@@ -45,7 +45,7 @@ export const useExercisesByEquipment = (
   params?: Pick<ApiParams, "limit" | "offset">
 ) => {
   return useQueryWithData<Exercise[]>(
-    exerciseKeys.byEquipment(equipment),
+    exerciseKeys.byEquipment(equipment, params),
     `/exercises/equipment/${equipment}`,
     Boolean(equipment),
     params
@@ -58,7 +58,7 @@ export const useExercisesByTarget = (
   params?: Pick<ApiParams, "limit" | "offset">
 ) => {
   return useQueryWithData<Exercise[]>(
-    exerciseKeys.byTarget(target),
+    exerciseKeys.byTarget(target, params),
     `/exercises/target/${target}`,
     Boolean(target),
     params
@@ -71,7 +71,7 @@ export const useExercisesByName = (
   params?: Pick<ApiParams, "limit" | "offset">
 ) => {
   return useQueryWithData<Exercise[]>(
-    exerciseKeys.byName(name),
+    exerciseKeys.byName(name, params),
     `/exercises/name/${name}`,
     Boolean(name),
     params
@@ -79,35 +79,25 @@ export const useExercisesByName = (
 };
 
 // Vücut bölümleri listesini getir
-export const useBodyPartList = (
-  params?: Pick<ApiParams, "limit" | "offset">
-) => {
+export const useBodyPartList = () => {
   return useQueryWithData<BodyPartList>(
     exerciseKeys.bodyParts(),
-    "/exercises/bodyPartList",
-    true,
-    params
+    "/exercises/bodyPartList"
   );
 };
 
 // Ekipman listesini getir
-export const useEquipmentList = (
-  params?: Pick<ApiParams, "limit" | "offset">
-) => {
+export const useEquipmentList = () => {
   return useQueryWithData<EquipmentList>(
     exerciseKeys.equipment(),
-    "/exercises/equipmentList",
-    true,
-    params
+    "/exercises/equipmentList"
   );
 };
 
 // Hedef kas listesi
-export const useTargetList = (params?: Pick<ApiParams, "limit" | "offset">) => {
+export const useTargetList = () => {
   return useQueryWithData<TargetList>(
     exerciseKeys.targets(),
-    "/exercises/targetList",
-    true,
-    params
+    "/exercises/targetList"
   );
 };
