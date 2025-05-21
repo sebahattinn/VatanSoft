@@ -1,9 +1,15 @@
 import { useExerciseDetail } from "@/services/exerciseService";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Card, CardContent } from "./ui/card";
-import { Badge } from "./ui/badge";
-import { Skeleton } from "./ui/skeleton";
-import { ScrollArea } from "./ui/scroll-area";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ExerciseDetailProps {
   exerciseId: string;
@@ -18,82 +24,100 @@ export default function ExerciseDetail({
 
   return (
     <Dialog open={true} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-3xl h-[90vh] p-6">
+      <DialogContent className="!max-w-5xl h-[90vh] p-6 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
         <DialogHeader className="px-0">
-          <DialogTitle className="text-2xl">
+          <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
             {isLoading ? <Skeleton className="h-8 w-64" /> : exercise?.name}
           </DialogTitle>
+          <DialogDescription>
+            {isLoading ? (
+              <Skeleton className="h-6 w-48" />
+            ) : (
+              <p className="text-gray-600 text-sm">
+                {exercise?.bodyPart} | {exercise?.target}
+              </p>
+            )}
+          </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="h-[calc(90vh-8rem)] mt-4 pr-4">
+        <ScrollArea className="h-[calc(90vh-8rem)] mt-6 pr-4">
           {isLoading ? (
-            <div className="space-y-4">
-              <Skeleton className="h-48 w-full" />
-              <Skeleton className="h-24 w-full" />
+            <div className="space-y-6">
+              <Skeleton className="h-48 w-full rounded-xl" />
+              <Skeleton className="h-24 w-full rounded-xl" />
               <div className="grid grid-cols-3 gap-4">
-                <Skeleton className="h-16 w-full" />
-                <Skeleton className="h-16 w-full" />
-                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-20 w-full rounded-xl" />
+                <Skeleton className="h-20 w-full rounded-xl" />
+                <Skeleton className="h-20 w-full rounded-xl" />
               </div>
             </div>
           ) : (
-            <div className="space-y-6">
-              <Card>
+            <div className="space-y-8">
+              <Card className="overflow-hidden border-2">
                 <CardContent className="p-0">
-                  <img
-                    src={exercise?.gifUrl}
-                    alt={exercise?.name}
-                    className="w-full max-h-96 object-contain rounded-lg"
-                  />
+                  <div className="relative group">
+                    <img
+                      src={exercise?.gifUrl}
+                      alt={exercise?.name}
+                      className="w-full max-h-96 object-contain rounded-lg transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
                 </CardContent>
               </Card>
-              <div className="grid grid-cols-3 gap-4">
-                <Card>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="transition-all duration-300 hover:border-primary/50">
                   <CardContent className="pt-6">
                     <div className="text-center">
-                      <Badge variant="secondary" className="mb-2">
-                        Bölge
+                      <Badge variant="secondary" className="mb-3 font-medium">
+                        Body Part
                       </Badge>
-                      <p className="text-lg font-medium">
+                      <p className="text-lg font-semibold capitalize">
                         {exercise?.bodyPart}
                       </p>
                     </div>
                   </CardContent>
                 </Card>
-                <Card>
+                <Card className="transition-all duration-300 hover:border-primary/50">
                   <CardContent className="pt-6">
                     <div className="text-center">
-                      <Badge variant="secondary" className="mb-2">
-                        Hedef
+                      <Badge variant="secondary" className="mb-3 font-medium">
+                        Target
                       </Badge>
-                      <p className="text-lg font-medium">{exercise?.target}</p>
+                      <p className="text-lg font-semibold capitalize">
+                        {exercise?.target}
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
-                <Card>
+                <Card className="transition-all duration-300 hover:border-primary/50">
                   <CardContent className="pt-6">
                     <div className="text-center">
-                      <Badge variant="secondary" className="mb-2">
-                        Ekipman
+                      <Badge variant="secondary" className="mb-3 font-medium">
+                        Equipment
                       </Badge>
-                      <p className="text-lg font-medium">
+                      <p className="text-lg font-semibold capitalize">
                         {exercise?.equipment}
                       </p>
                     </div>
                   </CardContent>
                 </Card>
-              </div>{" "}
+              </div>
+
               <div className="pb-4">
-                <h3 className="text-lg font-semibold mb-3">Talimatlar</h3>
-                <Card>
+                <h3 className="text-xl font-semibold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                  Instructions
+                </h3>
+                <Card className="border-2">
                   <CardContent className="pt-6">
-                    <ol className="list-decimal space-y-3">
-                      {exercise?.instructions.map((ins, idx) => (
+                    <ol className="list-decimal space-y-4">
+                      {exercise?.instructions.map((instruction, idx) => (
                         <li
                           key={idx}
-                          className="text-muted-foreground ml-5 pl-2"
+                          className="text-gray-600 ml-5 pl-2 text-[15px] leading-relaxed"
                         >
-                          {ins}
+                          {instruction}
                         </li>
                       ))}
                     </ol>

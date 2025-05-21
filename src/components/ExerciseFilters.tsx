@@ -3,10 +3,24 @@ import {
   useEquipmentList,
   useTargetList,
 } from "@/services/exerciseService";
-import { Button } from "./ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { ScrollArea } from "./ui/scroll-area";
-import { Badge } from "./ui/badge";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 interface SelectedFilters {
   bodyPart: string;
@@ -38,7 +52,15 @@ export function ExerciseFilters({
   const hasActiveFilters =
     selected.bodyPart || selected.target || selected.equipment;
 
-  // Yeni seçim işleyicileri
+  // Helper function to format text
+  const formatText = (text: string) => {
+    return text
+      .split(/[\s-]+/)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
+  // Handlers
   const handleBodyPartSelect = (value: string) => {
     onSelect.setTarget("");
     onSelect.setEquipment("");
@@ -58,117 +80,239 @@ export function ExerciseFilters({
   };
 
   return (
-    <div className="w-full space-y-4">
-      {hasActiveFilters && (
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-sm">
-            Aktif Filtreler
-          </Badge>
-          {selected.bodyPart && (
-            <Badge
-              variant="secondary"
-              className="cursor-pointer text-black"
-              onClick={() => handleBodyPartSelect("")}
-            >
-              {selected.bodyPart} ×
-            </Badge>
+    <Card className="w-full p-4 bg-white shadow-lg">
+      <div className="space-y-4">
+        {/* Active Filters Area */}
+        <div className="relative min-h-[48px] w-full">
+          {hasActiveFilters && (
+            <div className="flex flex-wrap items-center gap-2 pb-4 border-b absolute inset-x-0">
+              <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
+                <Badge
+                  variant="outline"
+                  className="bg-gray-100 text-gray-700 border-gray-200 shrink-0"
+                >
+                  Active Filters
+                </Badge>
+                {selected.bodyPart && (
+                  <Badge
+                    variant="secondary"
+                    className="cursor-pointer hover:bg-gray-100 transition-colors group bg-gray-50 text-gray-700 shrink-0"
+                    onClick={() => handleBodyPartSelect("")}
+                  >
+                    <span className="mr-1">💪</span>
+                    <span className="truncate">
+                      {formatText(selected.bodyPart)}
+                    </span>
+                    <span className="ml-1 opacity-60 group-hover:opacity-100">
+                      ×
+                    </span>
+                  </Badge>
+                )}
+                {selected.target && (
+                  <Badge
+                    variant="secondary"
+                    className="cursor-pointer hover:bg-gray-100 transition-colors group bg-gray-50 text-gray-700 shrink-0"
+                    onClick={() => handleTargetSelect("")}
+                  >
+                    <span className="mr-1">🎯</span>
+                    <span className="truncate">
+                      {formatText(selected.target)}
+                    </span>
+                    <span className="ml-1 opacity-60 group-hover:opacity-100">
+                      ×
+                    </span>
+                  </Badge>
+                )}
+                {selected.equipment && (
+                  <Badge
+                    variant="secondary"
+                    className="cursor-pointer hover:bg-gray-100 transition-colors group bg-gray-50 text-gray-700 shrink-0"
+                    onClick={() => handleEquipmentSelect("")}
+                  >
+                    <span className="mr-1">🧰</span>
+                    <span className="truncate">
+                      {formatText(selected.equipment)}
+                    </span>
+                    <span className="ml-1 opacity-60 group-hover:opacity-100">
+                      ×
+                    </span>
+                  </Badge>
+                )}
+              </div>
+              <Button
+                onClick={onClear}
+                variant="default"
+                size="sm"
+                className=" shrink-0"
+              >
+                Clear All
+              </Button>
+            </div>
           )}
-          {selected.target && (
-            <Badge
-              variant="secondary"
-              className="cursor-pointer text-black"
-              onClick={() => handleTargetSelect("")}
-            >
-              🎯 {selected.target} ×
-            </Badge>
-          )}
-          {selected.equipment && (
-            <Badge
-              variant="secondary"
-              className="cursor-pointer text-black"
-              onClick={() => handleEquipmentSelect("")}
-            >
-              🧰 {selected.equipment} ×
-            </Badge>
-          )}
-          <Button
-            onClick={onClear}
-            variant="ghost"
-            size="sm"
-            className="ml-auto"
-          >
-            Tümünü Temizle
-          </Button>
         </div>
-      )}
 
-      <Tabs defaultValue="bodyParts" className="w-full">
-        <TabsList className="w-full justify-start">
-          <TabsTrigger className="text-white" value="bodyParts">
-            Vücut Bölgeleri
-          </TabsTrigger>
-          <TabsTrigger className="text-white" value="targets">
-            Hedef Kaslar
-          </TabsTrigger>
-          <TabsTrigger className="text-white" value="equipment">
-            Ekipmanlar
-          </TabsTrigger>
-        </TabsList>
+        {/* Filter Groups */}
+        <Accordion type="single" collapsible className="w-full">
+          {/* Body Parts */}
+          <AccordionItem value="body-parts" className="border-gray-200">
+            <AccordionTrigger className="hover:no-underline hover:bg-gray-50">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">💪</span>
+                <span className="text-gray-900">Body Parts</span>
+                {selected.bodyPart && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-2 bg-gray-100 text-gray-700"
+                  >
+                    {formatText(selected.bodyPart)}
+                  </Badge>
+                )}
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <Command className="rounded-lg border border-gray-200 bg-white">
+                <CommandInput
+                  placeholder="Search body parts..."
+                  className="text-gray-900"
+                />
+                <CommandList>
+                  <CommandEmpty className="text-gray-500">
+                    No results found
+                  </CommandEmpty>
+                  <CommandGroup>
+                    <ScrollArea className="h-[200px]">
+                      {bodyParts.map((part) => (
+                        <CommandItem
+                          key={part}
+                          value={part}
+                          onSelect={() => handleBodyPartSelect(part)}
+                          className="cursor-pointer text-gray-700 hover:bg-gray-50"
+                        >
+                          {formatText(part)}
+                          {selected.bodyPart === part && (
+                            <Badge
+                              variant="secondary"
+                              className="ml-auto bg-gray-100"
+                            >
+                              Selected
+                            </Badge>
+                          )}
+                        </CommandItem>
+                      ))}
+                    </ScrollArea>
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </AccordionContent>
+          </AccordionItem>
 
-        <TabsContent value="bodyParts">
-          <ScrollArea className="h-[200px] w-full rounded-md border p-4">
-            <div className="flex flex-wrap gap-2">
-              {bodyParts.map((part) => (
-                <Button
-                  key={part}
-                  onClick={() => handleBodyPartSelect(part)}
-                  variant={selected.bodyPart === part ? "secondary" : "outline"}
-                  size="sm"
-                  className="text-white"
-                >
-                  {part}
-                </Button>
-              ))}
-            </div>
-          </ScrollArea>
-        </TabsContent>
+          {/* Target Muscles */}
+          <AccordionItem value="targets" className="border-gray-200">
+            <AccordionTrigger className="hover:no-underline hover:bg-gray-50">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🎯</span>
+                <span className="text-gray-900">Target Muscles</span>
+                {selected.target && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-2 bg-gray-100 text-gray-700"
+                  >
+                    {formatText(selected.target)}
+                  </Badge>
+                )}
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <Command className="rounded-lg border border-gray-200 bg-white">
+                <CommandInput
+                  placeholder="Search target muscles..."
+                  className="text-gray-900"
+                />
+                <CommandList>
+                  <CommandEmpty className="text-gray-500">
+                    No results found
+                  </CommandEmpty>
+                  <CommandGroup>
+                    <ScrollArea className="h-[200px]">
+                      {targets.map((target) => (
+                        <CommandItem
+                          key={target}
+                          value={target}
+                          onSelect={() => handleTargetSelect(target)}
+                          className="cursor-pointer text-gray-700 hover:bg-gray-50"
+                        >
+                          {formatText(target)}
+                          {selected.target === target && (
+                            <Badge
+                              variant="secondary"
+                              className="ml-auto bg-gray-100"
+                            >
+                              Selected
+                            </Badge>
+                          )}
+                        </CommandItem>
+                      ))}
+                    </ScrollArea>
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </AccordionContent>
+          </AccordionItem>
 
-        <TabsContent value="targets">
-          <ScrollArea className="h-[200px] w-full rounded-md border p-4">
-            <div className="flex flex-wrap gap-2">
-              {targets.map((target) => (
-                <Button
-                  key={target}
-                  onClick={() => handleTargetSelect(target)}
-                  variant={selected.target === target ? "secondary" : "outline"}
-                  size="sm"
-                  className="text-white"
-                >
-                  🎯 {target}
-                </Button>
-              ))}
-            </div>
-          </ScrollArea>
-        </TabsContent>
-
-        <TabsContent value="equipment">
-          <ScrollArea className="h-[200px] w-full rounded-md border p-4">
-            <div className="flex flex-wrap gap-2">
-              {equipment.map((eq) => (
-                <Button
-                  key={eq}
-                  onClick={() => handleEquipmentSelect(eq)}
-                  variant={selected.equipment === eq ? "secondary" : "outline"}
-                  size="sm"
-                  className="text-white"
-                >
-                  🧰 {eq}
-                </Button>
-              ))}
-            </div>
-          </ScrollArea>
-        </TabsContent>
-      </Tabs>
-    </div>
+          {/* Equipment */}
+          <AccordionItem value="equipment" className="border-gray-200">
+            <AccordionTrigger className="hover:no-underline hover:bg-gray-50">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🧰</span>
+                <span className="text-gray-900">Equipment</span>
+                {selected.equipment && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-2 bg-gray-100 text-gray-700"
+                  >
+                    {formatText(selected.equipment)}
+                  </Badge>
+                )}
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <Command className="rounded-lg border border-gray-200 bg-white">
+                <CommandInput
+                  placeholder="Search equipment..."
+                  className="text-gray-900"
+                />
+                <CommandList>
+                  <CommandEmpty className="text-gray-500">
+                    No results found
+                  </CommandEmpty>
+                  <CommandGroup>
+                    <ScrollArea className="h-[200px]">
+                      {equipment.map((eq) => (
+                        <CommandItem
+                          key={eq}
+                          value={eq}
+                          onSelect={() => handleEquipmentSelect(eq)}
+                          className="cursor-pointer text-gray-700 hover:bg-gray-50"
+                        >
+                          {formatText(eq)}
+                          {selected.equipment === eq && (
+                            <Badge
+                              variant="secondary"
+                              className="ml-auto bg-gray-100"
+                            >
+                              Selected
+                            </Badge>
+                          )}
+                        </CommandItem>
+                      ))}
+                    </ScrollArea>
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
+    </Card>
   );
 }

@@ -1,54 +1,79 @@
-# React + TypeScript + Vite
+# 🏋️‍♂️ Exercise Explorer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Modern, hızlı ve filtreleme destekli bir egzersiz arama uygulaması. Vücut bölgesi, hedef kas veya ekipmana göre filtreleyebilir, detaylarını inceleyebilirsiniz.
 
-Currently, two official plugins are available:
+![Screenshot](./screenshot.png) <!-- Varsa bir ekran görüntüsü ekleyin -->
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## 🚀 Özellikler
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- 🔍 **Egzersiz Arama** (isimle)
+- 🧠 **Filtreleme**: Vücut bölgesi, hedef kas veya ekipman
+- 📦 **RapidAPI ExerciseDB** üzerinden canlı veri
+- 💡 **Açılır pencerede detaylar**
+- 🌀 **Sayfalama (Pagination)**
+- ⚡ Vite + React + TypeScript
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+---
+
+## 📦 Kurulum
+
+```bash
+git clone https://github.com/kullaniciadi/proje-adi.git
+cd proje-adi
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+> `.env` dosyasına `VITE_RAPIDAPI_KEY` eklemeyi unutmayın.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+## ⚙️ .env Örneği
+
+```env
+VITE_RAPIDAPI_KEY=your_api_key
 ```
+
+---
+
+## 🧱 Proje Yapısı
+
+```
+src/
+├── api/                # Axios config ve API katmanı
+├── components/         # UI bileşenleri (card, filtre, liste vs.)
+├── hooks/              # Custom React hook'lar
+├── services/           # API abstraction hook'ları
+├── types/              # TypeScript tip tanımları
+├── utils/              # LocalStorage, query key yönetimi
+```
+
+---
+
+## 🧑‍💻 Kullanılan Teknolojiler
+
+- [React](https://react.dev/)
+- [Vite](https://vitejs.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [TanStack Query (React Query)](https://tanstack.com/query/latest)
+- [Radix UI](https://www.radix-ui.com/)
+- [TailwindCSS](https://tailwindcss.com/)
+- [ExerciseDB API](https://rapidapi.com/justin-WFnsXH_t6/api/exercisedb)
+
+---
+
+## 🖼 Örnek Kullanım
+
+- Ana sayfa: Arama + filtre alanı + egzersiz kartları
+- Egzersize tıklanınca modal açılır, detayları gösterir
+- "Daha Fazla Yükle" ile sayfalama yapılır
+
+---
+
+## 🤝 Katkıda Bulunmak
+
+PR'lar, bug fix'ler ve iyileştirmeler memnuniyetle kabul edilir.
+
+---

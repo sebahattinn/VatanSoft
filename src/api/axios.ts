@@ -2,7 +2,7 @@ import axios from "axios";
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
 import { toast } from "sonner";
 
-import { getApiConfig } from "./config";
+import { getApiConfig } from "@/api/config";
 
 // Lazy initialization of axios instance
 const createApi = () => {
