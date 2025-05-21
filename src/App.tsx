@@ -1,5 +1,5 @@
-import { ExerciseList } from "./components/ExerciseList";
-import { Toaster } from "./components/ui/sonner";
+import { ExerciseList } from "@/components/ExerciseList";
+import { Toaster } from "@/components/ui/sonner";
 
 function App() {
   return (
