@@ -8,6 +8,7 @@ import { ExerciseFilters } from "@/components/ExerciseFilters";
 import { ExerciseSearchForm } from "@/components/ExerciseSearchForm";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import type { Exercise } from "@/types/exercise";
+import { getFavorites } from "@/utils/favorites";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -16,15 +17,12 @@ export function ExerciseList() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [page, setPage] = useState(0);
   const [exercises, setExercises] = useState<Exercise[]>([]);
-
   const [filters, setFilters] = useState({
     bodyPart: "",
     target: "",
     equipment: "",
+    favorite: false,
   });
-
-  const hasActiveFilters =
-    filters.bodyPart || filters.target || filters.equipment || searchTerm;
 
   const paginationParams = {
     offset: page * ITEMS_PER_PAGE,
@@ -39,35 +37,59 @@ export function ExerciseList() {
 
   useEffect(() => {
     setPage(0);
-  }, [filters.bodyPart, filters.target, filters.equipment, searchTerm]);
+  }, [
+    filters.bodyPart,
+    filters.target,
+    filters.equipment,
+    filters.favorite,
+    searchTerm,
+  ]);
 
   useEffect(() => {
     if (!currentData) return;
 
+    // Eğer favoriler filtresi aktifse, sadece favori egzersizleri göster
+    let filteredData = currentData;
+    if (filters.favorite) {
+      const favorites = getFavorites();
+      filteredData = currentData.filter((exercise) =>
+        favorites.includes(exercise.id)
+      );
+    }
+
     if (page === 0) {
-      const currentIds = JSON.stringify(currentData.map((e) => e.id));
+      const currentIds = JSON.stringify(filteredData.map((e) => e.id));
       const prevIds = JSON.stringify(exercises.map((e) => e.id));
       if (currentIds !== prevIds) {
-        setExercises(currentData);
+        setExercises(filteredData);
       }
     }
-  }, [currentData, exercises, page]);
+  }, [currentData, exercises, page, filters.favorite]);
 
   useEffect(() => {
     if (!currentData || page === 0) return;
 
+    // Eğer favoriler filtresi aktifse, sadece favori egzersizleri ekle
+    let filteredData = currentData;
+    if (filters.favorite) {
+      const favorites = getFavorites();
+      filteredData = currentData.filter((exercise) =>
+        favorites.includes(exercise.id)
+      );
+    }
+
     setExercises((prev) => {
       const existingIds = new Set(prev.map((e) => e.id));
-      const fresh = currentData.filter((e) => !existingIds.has(e.id));
+      const fresh = filteredData.filter((e) => !existingIds.has(e.id));
       if (fresh.length === 0) return prev;
       return [...prev, ...fresh];
     });
-  }, [currentData, page]);
+  }, [currentData, page, filters.favorite]);
 
   const hasMore = (currentData?.length ?? 0) === ITEMS_PER_PAGE;
 
   const handleClearFilters = () => {
-    setFilters({ bodyPart: "", target: "", equipment: "" });
+    setFilters({ bodyPart: "", target: "", equipment: "", favorite: false });
     setSearchTerm("");
     setSelectedExerciseId("");
     setPage(0);
@@ -93,7 +115,6 @@ export function ExerciseList() {
           </div>
         </div>
       </div>
-
       {/* Main Content */}
       <div className="container mx-auto py-8 px-4">
         <div className="grid grid-cols-12 gap-6">
@@ -109,18 +130,43 @@ export function ExerciseList() {
                   selected={filters}
                   onSelect={{
                     setBodyPart: (bodyPart) =>
-                      setFilters({ bodyPart, target: "", equipment: "" }),
+                      setFilters({
+                        ...filters,
+                        bodyPart,
+                        target: "",
+                        equipment: "",
+                        favorite: false,
+                      }),
                     setTarget: (target) =>
-                      setFilters({ bodyPart: "", target, equipment: "" }),
+                      setFilters({
+                        ...filters,
+                        bodyPart: "",
+                        target,
+                        equipment: "",
+                        favorite: false,
+                      }),
                     setEquipment: (equipment) =>
-                      setFilters({ bodyPart: "", target: "", equipment }),
+                      setFilters({
+                        ...filters,
+                        bodyPart: "",
+                        target: "",
+                        equipment,
+                        favorite: false,
+                      }),
+                    setFavorite: (favorite) =>
+                      setFilters({
+                        ...filters,
+                        bodyPart: "",
+                        target: "",
+                        equipment: "",
+                        favorite,
+                      }),
                   }}
                   onClear={handleClearFilters}
                 />
               </CardContent>
             </Card>
           </div>
-
           {/* Main Content - Exercise Grid */}
           <div className="col-span-12 lg:col-span-9">
             {/* Results Info */}
@@ -129,18 +175,10 @@ export function ExerciseList() {
                 <p className="text-sm text-gray-600">
                   Showing {exercises.length}{" "}
                   {exercises.length === 1 ? "result" : "results"}
+                  {filters.favorite && " (favorites only)"}
                 </p>
-                <Button
-                  variant="ghost"
-                  onClick={handleClearFilters}
-                  className="text-sm"
-                  disabled={!hasActiveFilters}
-                >
-                  Clear Filters
-                </Button>
               </div>
             )}
-
             {/* Exercise Grid */}
             <div
               className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
@@ -153,7 +191,6 @@ export function ExerciseList() {
                   onClick={() => setSelectedExerciseId(exercise.id)}
                 />
               ))}
-
               {/* Loading Skeletons */}
               {isLoading &&
                 [...Array(6)].map((_, i) => (
@@ -170,15 +207,15 @@ export function ExerciseList() {
                   </Card>
                 ))}
             </div>
-
             {/* No Results */}
             {exercises.length === 0 && !isLoading && (
               <Card className="p-12 text-center">
                 <div className="max-w-sm mx-auto space-y-4">
                   <h3 className="text-lg font-medium">No Results Found</h3>
                   <p className="text-sm text-gray-600">
-                    Try different keywords or clear your filters to see more
-                    results.
+                    {filters.favorite
+                      ? "You don't have any favorite exercises yet. Add some to your favorites!"
+                      : "Try different keywords or clear your filters to see more results."}
                   </p>
                   <Button
                     onClick={handleClearFilters}
@@ -190,13 +227,12 @@ export function ExerciseList() {
                 </div>
               </Card>
             )}
-
             {/* Load More */}
             {hasMore && !isLoading && (
               <div className="mt-8 text-center">
                 <Button
                   onClick={handleLoadMore}
-                  variant="outline"
+                  variant="default"
                   size="lg"
                   className="min-w-[200px]"
                 >
@@ -207,7 +243,6 @@ export function ExerciseList() {
           </div>
         </div>
       </div>
-
       {/* Exercise Detail Modal */}
       {selectedExerciseId && (
         <ExerciseDetail

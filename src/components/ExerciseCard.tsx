@@ -80,7 +80,7 @@ export function ExerciseCard({ exercise, onClick }: Props) {
           <Heart
             className={cn(
               "size-5 transition-colors",
-              fav ? "fill-red-500 stroke-red-500" : "stroke-white"
+              fav ? "fill-red-500 stroke-red-500" : "stroke-black"
             )}
           />
         </Button>

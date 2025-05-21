@@ -12,6 +12,7 @@ export const toggleFavorite = (id: string): string[] => {
     : [...current, id];
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  window.dispatchEvent(new Event("favoritesUpdated"));
   return updated;
 };
 

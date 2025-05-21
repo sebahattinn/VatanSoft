@@ -70,7 +70,7 @@ export default function ExerciseDetail({
                 <Card className="transition-all duration-300 hover:border-primary/50">
                   <CardContent className="pt-6">
                     <div className="text-center">
-                      <Badge variant="secondary" className="mb-3 font-medium">
+                      <Badge variant="default" className="mb-3 font-medium">
                         Body Part
                       </Badge>
                       <p className="text-lg font-semibold capitalize">
@@ -82,7 +82,7 @@ export default function ExerciseDetail({
                 <Card className="transition-all duration-300 hover:border-primary/50">
                   <CardContent className="pt-6">
                     <div className="text-center">
-                      <Badge variant="secondary" className="mb-3 font-medium">
+                      <Badge variant="default" className="mb-3 font-medium">
                         Target
                       </Badge>
                       <p className="text-lg font-semibold capitalize">
@@ -94,7 +94,7 @@ export default function ExerciseDetail({
                 <Card className="transition-all duration-300 hover:border-primary/50">
                   <CardContent className="pt-6">
                     <div className="text-center">
-                      <Badge variant="secondary" className="mb-3 font-medium">
+                      <Badge variant="default" className="mb-3 font-medium">
                         Equipment
                       </Badge>
                       <p className="text-lg font-semibold capitalize">

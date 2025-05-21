@@ -21,17 +21,21 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { getFavorites } from "@/utils/favorites";
+import { useEffect, useState } from "react";
 
 interface SelectedFilters {
   bodyPart: string;
   target: string;
   equipment: string;
+  favorite: boolean;
 }
 
 interface OnSelectHandlers {
   setBodyPart: (value: string) => void;
   setTarget: (value: string) => void;
   setEquipment: (value: string) => void;
+  setFavorite: (value: boolean) => void;
 }
 
 interface ExerciseFiltersProps {
@@ -48,9 +52,19 @@ export function ExerciseFilters({
   const { data: bodyParts = [] } = useBodyPartList();
   const { data: targets = [] } = useTargetList();
   const { data: equipment = [] } = useEquipmentList();
+  const [favoriteCount, setFavoriteCount] = useState(0);
+
+  useEffect(() => {
+    // Favori sayısını güncelle
+    const favorites = getFavorites();
+    setFavoriteCount(favorites.length);
+  }, []);
 
   const hasActiveFilters =
-    selected.bodyPart || selected.target || selected.equipment;
+    selected.bodyPart ||
+    selected.target ||
+    selected.equipment ||
+    selected.favorite;
 
   // Helper function to format text
   const formatText = (text: string) => {
@@ -64,26 +78,50 @@ export function ExerciseFilters({
   const handleBodyPartSelect = (value: string) => {
     onSelect.setTarget("");
     onSelect.setEquipment("");
+    onSelect.setFavorite(false);
     onSelect.setBodyPart(value);
   };
 
   const handleTargetSelect = (value: string) => {
     onSelect.setBodyPart("");
     onSelect.setEquipment("");
+    onSelect.setFavorite(false);
     onSelect.setTarget(value);
   };
 
   const handleEquipmentSelect = (value: string) => {
     onSelect.setBodyPart("");
     onSelect.setTarget("");
+    onSelect.setFavorite(false);
     onSelect.setEquipment(value);
   };
+
+  const handleFavoriteSelect = (value: boolean) => {
+    onSelect.setBodyPart("");
+    onSelect.setTarget("");
+    onSelect.setEquipment("");
+    onSelect.setFavorite(value);
+  };
+
+  useEffect(() => {
+    const updateFavorites = () => {
+      const favorites = getFavorites();
+      setFavoriteCount(favorites.length);
+    };
+
+    updateFavorites();
+
+    window.addEventListener("favoritesUpdated", updateFavorites);
+    return () => {
+      window.removeEventListener("favoritesUpdated", updateFavorites);
+    };
+  }, []);
 
   return (
     <Card className="w-full p-4 bg-white shadow-lg">
       <div className="space-y-4">
         {/* Active Filters Area */}
-        <div className="relative min-h-[48px] w-full">
+        <div className={`relative w-full ${hasActiveFilters ? "mb-16" : ""}`}>
           {hasActiveFilters && (
             <div className="flex flex-wrap items-center gap-2 pb-4 border-b absolute inset-x-0">
               <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
@@ -91,7 +129,7 @@ export function ExerciseFilters({
                   variant="outline"
                   className="bg-gray-100 text-gray-700 border-gray-200 shrink-0"
                 >
-                  Active Filters
+                  Active Filter
                 </Badge>
                 {selected.bodyPart && (
                   <Badge
@@ -138,6 +176,19 @@ export function ExerciseFilters({
                     </span>
                   </Badge>
                 )}
+                {selected.favorite && (
+                  <Badge
+                    variant="secondary"
+                    className="cursor-pointer hover:bg-gray-100 transition-colors group bg-gray-50 text-gray-700 shrink-0"
+                    onClick={() => handleFavoriteSelect(false)}
+                  >
+                    <span className="mr-1">⭐</span>
+                    <span className="truncate">Favorites</span>
+                    <span className="ml-1 opacity-60 group-hover:opacity-100">
+                      ×
+                    </span>
+                  </Badge>
+                )}
               </div>
               <Button
                 onClick={onClear}
@@ -145,7 +196,7 @@ export function ExerciseFilters({
                 size="sm"
                 className=" shrink-0"
               >
-                Clear All
+                Clear Filter
               </Button>
             </div>
           )}
@@ -153,6 +204,48 @@ export function ExerciseFilters({
 
         {/* Filter Groups */}
         <Accordion type="single" collapsible className="w-full">
+          {/* Favorites */}
+          <AccordionItem value="favorites" className="border-gray-200">
+            <AccordionTrigger className="hover:no-underline hover:bg-gray-50">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">⭐</span>
+                <span className="text-gray-900">Favorites</span>
+                {favoriteCount > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-2 bg-gray-100 text-gray-700"
+                  >
+                    {favoriteCount}
+                  </Badge>
+                )}
+                {selected.favorite && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-2 bg-gray-100 text-gray-700"
+                  >
+                    Active
+                  </Badge>
+                )}
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="p-4 flex flex-col gap-4">
+                <p className="text-gray-600 text-sm">
+                  {favoriteCount > 0
+                    ? `You have ${favoriteCount} favorite exercises.`
+                    : "You don't have any favorite exercises yet."}
+                </p>
+                <Button
+                  onClick={() => handleFavoriteSelect(!selected.favorite)}
+                  variant={selected.favorite ? "outline" : "default"}
+                  className="w-full"
+                >
+                  {selected.favorite ? "Hide Favorites" : "Show Only Favorites"}
+                </Button>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
           {/* Body Parts */}
           <AccordionItem value="body-parts" className="border-gray-200">
             <AccordionTrigger className="hover:no-underline hover:bg-gray-50">
